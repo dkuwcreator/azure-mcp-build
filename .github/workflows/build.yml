@@ -59,26 +59,30 @@ jobs:
           VERSION="${{ steps.get-version.outputs.version }}"
           npm install @azure/mcp@$VERSION
       
-      # Step 7: Build binaries for Windows x64
+      # Step 7: Create output directory for binaries
+      - name: Create output directory
+        if: steps.check-tag.outputs.exists == 'false'
+        run: mkdir -p dist
+      
+      # Step 8: Build binaries for Windows x64
       - name: Build Windows x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          mkdir -p dist
           pkg node_modules/@azure/mcp/package.json --target node20-win-x64 --output dist/azure-mcp-win-x64.exe
       
-      # Step 8: Build binaries for Linux x64
+      # Step 9: Build binaries for Linux x64
       - name: Build Linux x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           pkg node_modules/@azure/mcp/package.json --target node20-linux-x64 --output dist/azure-mcp-linux-x64
       
-      # Step 9: Build binaries for macOS x64
+      # Step 10: Build binaries for macOS x64
       - name: Build macOS x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           pkg node_modules/@azure/mcp/package.json --target node20-macos-x64 --output dist/azure-mcp-macos-x64
       
-      # Step 10: Create zip archives for each binary
+      # Step 11: Create zip archives for each binary
       - name: Create zip archives
         if: steps.check-tag.outputs.exists == 'false'
         run: |
@@ -92,7 +96,7 @@ jobs:
           # List created archives
           ls -lh *.zip
       
-      # Step 11: Create GitHub release with binaries
+      # Step 12: Create GitHub release with binaries
       - name: Create GitHub Release
         if: steps.check-tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
