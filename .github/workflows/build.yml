@@ -86,7 +86,12 @@ jobs:
       - name: Create zip archives
         if: steps.check-tag.outputs.exists == 'false'
         run: |
+          set -e
           cd dist
+          # Verify binaries exist before zipping
+          [ -f azure-mcp-win-x64.exe ] || { echo "Windows binary not found"; exit 1; }
+          [ -f azure-mcp-linux-x64 ] || { echo "Linux binary not found"; exit 1; }
+          [ -f azure-mcp-macos-x64 ] || { echo "macOS binary not found"; exit 1; }
           # Zip Windows binary
           zip azure-mcp-win-x64.zip azure-mcp-win-x64.exe
           # Zip Linux binary
