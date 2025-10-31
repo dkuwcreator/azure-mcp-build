@@ -63,7 +63,6 @@ jobs:
       - name: Build Windows x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           mkdir -p dist
           pkg node_modules/@azure/mcp/package.json --target node20-win-x64 --output dist/azure-mcp-win-x64.exe
       
@@ -71,14 +70,12 @@ jobs:
       - name: Build Linux x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           pkg node_modules/@azure/mcp/package.json --target node20-linux-x64 --output dist/azure-mcp-linux-x64
       
       # Step 9: Build binaries for macOS x64
       - name: Build macOS x64 binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           pkg node_modules/@azure/mcp/package.json --target node20-macos-x64 --output dist/azure-mcp-macos-x64
       
       # Step 10: Create zip archives for each binary
