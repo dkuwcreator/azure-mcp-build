@@ -61,7 +61,7 @@ jobs:
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          npm install "@azure/mcp-${{ matrix.npm-platform }}@$VERSION"
+          npm install "@azure/mcp-${{ matrix.npm-platform }}@$VERSION" --force
 
       # Extract binary from the platform package
       - name: Extract MCP binary
