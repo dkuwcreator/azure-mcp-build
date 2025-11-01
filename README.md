@@ -66,7 +66,8 @@ Configure your MCP client (like Claude Desktop) to connect to the server:
 Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary (use `azure-mcp-win-x64.exe` for Windows, `azure-mcp-macos-x64` for macOS).
 
 **For VS Code with GitHub Copilot:**
-Install the Azure MCP Server extension and it will automatically use the binary.
+1. Install the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
+2. The extension will automatically detect and use the Azure MCP Server when configured
 
 ### 4. Start Using Azure Resources
 
