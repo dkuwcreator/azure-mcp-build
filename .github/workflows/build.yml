@@ -57,6 +57,8 @@ jobs:
         id: check-tag
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
+          # GitHub Actions converts boolean inputs to string 'true' or 'false'
+          # Default to 'false' when triggered by push/schedule (non-manual triggers)
           FORCE_REBUILD="${{ github.event.inputs.force-rebuild || 'false' }}"
           
           if [ "$FORCE_REBUILD" = "true" ]; then
