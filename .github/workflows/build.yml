@@ -67,8 +67,20 @@ jobs:
       - name: Extract MCP binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          cp node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }} azure-mcp-${{ matrix.platform }}
-          chmod +x azure-mcp-${{ matrix.platform }}
+          SOURCE="node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }}"
+          TARGET="azure-mcp-${{ matrix.platform }}"
+          
+          if [ ! -f "$SOURCE" ]; then
+            echo "Error: Binary not found at $SOURCE"
+            exit 1
+          fi
+          
+          cp "$SOURCE" "$TARGET"
+          
+          # Only chmod on Unix binaries (not .exe files)
+          if [[ ! "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
+            chmod +x "$TARGET"
+          fi
 
       # Create zip archive of the binary
       - name: Archive build
