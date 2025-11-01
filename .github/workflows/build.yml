@@ -68,6 +68,7 @@ jobs:
 
       # Extract binary from the platform package
       - name: Extract MCP binary
+        id: extract-binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           SOURCE="node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }}"
@@ -90,38 +91,47 @@ jobs:
           if [[ ! "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
             chmod +x "$TARGET"
           fi
+          
+          # Export binary name for subsequent steps
+          echo "binary-name=$TARGET" >> "$GITHUB_OUTPUT"
 
       # Create zip archive of the binary
       - name: Archive build
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          # Use correct binary name with extension if applicable
-          if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
-            BINARY="azure-mcp-${{ matrix.platform }}.exe"
-          else
-            BINARY="azure-mcp-${{ matrix.platform }}"
-          fi
-          zip azure-mcp-${{ matrix.platform }}.zip "$BINARY"
+          zip azure-mcp-${{ matrix.platform }}.zip "${{ steps.extract-binary.outputs.binary-name }}"
 
       # Smoke test: verify the binary can be executed
       - name: Smoke test binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          # Determine binary name with correct extension
-          if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
-            BINARY="azure-mcp-${{ matrix.platform }}.exe"
-          else
-            BINARY="azure-mcp-${{ matrix.platform }}"
-          fi
+          BINARY="${{ steps.extract-binary.outputs.binary-name }}"
           
           # For Windows binaries on Linux, we can only check if it's a valid PE executable
           # For Unix binaries, we can try to run them with --help
           if [[ "${{ matrix.platform }}" == "win-x64" ]]; then
             echo "Verifying Windows binary is a valid PE executable..."
-            file "$BINARY" | grep -q "PE32+" && echo "✓ Valid Windows PE executable" || exit 1
+            if file "$BINARY" | grep -q "PE32+"; then
+              echo "✓ Valid Windows PE executable"
+            else
+              echo "✗ Failed: Not a valid Windows PE executable"
+              exit 1
+            fi
           else
             echo "Testing binary execution with --help..."
-            ./"$BINARY" --help || echo "Binary executed (exit code: $?)"
+            if ./"$BINARY" --help >/dev/null 2>&1; then
+              echo "✓ Binary executed successfully"
+            else
+              EXIT_CODE=$?
+              echo "⚠ Binary execution completed with exit code: $EXIT_CODE"
+              # Exit code 1 is acceptable for --help in some CLIs
+              if [ $EXIT_CODE -eq 1 ]; then
+                echo "✓ Acceptable exit code for --help"
+              else
+                echo "✗ Unexpected exit code"
+                exit 1
+              fi
+            fi
           fi
 
       # Upload to GitHub release with version tag
