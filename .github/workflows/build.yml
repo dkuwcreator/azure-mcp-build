@@ -119,11 +119,16 @@ jobs:
             fi
           else
             echo "Testing binary execution with --help..."
-            if ./"$BINARY" --help >/dev/null 2>&1; then
+            # Run with --help and capture output for debugging
+            if OUTPUT=$(./"$BINARY" --help 2>&1); then
               echo "✓ Binary executed successfully"
+              echo "First few lines of output:"
+              echo "$OUTPUT" | head -n 5
             else
               EXIT_CODE=$?
               echo "⚠ Binary execution completed with exit code: $EXIT_CODE"
+              echo "First few lines of output:"
+              echo "$OUTPUT" | head -n 5
               # Exit code 1 is acceptable for --help in some CLIs
               if [ $EXIT_CODE -eq 1 ]; then
                 echo "✓ Acceptable exit code for --help"
