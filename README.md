@@ -57,7 +57,8 @@ Configure your MCP client (like Claude Desktop) to connect to the server:
 {
   "mcpServers": {
     "azure": {
-      "command": "/absolute/path/to/azure-mcp-linux-x64"
+      "command": "/absolute/path/to/azure-mcp-linux-x64",
+      "args": []
     }
   }
 }
@@ -76,7 +77,8 @@ Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to y
      "servers": {
        "azure": {
          "type": "stdio",
-         "command": "/absolute/path/to/azure-mcp-linux-x64"
+         "command": "/absolute/path/to/azure-mcp-linux-x64",
+         "args": []
        }
      }
    }
