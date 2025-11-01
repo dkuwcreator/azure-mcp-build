@@ -13,12 +13,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [win-x64, linux-x64, macos-x64]
+        include:
+          - platform: win-x64
+            npm-platform: win32-x64
+            binary-name: azmcp.exe
+          - platform: linux-x64
+            npm-platform: linux-x64
+            binary-name: azmcp
+          - platform: macos-x64
+            npm-platform: darwin-x64
+            binary-name: azmcp
 
     steps:
       # Checkout repository
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Setup Node.js with latest LTS version
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
 
       # Get the latest version of @azure/mcp from npm
       - name: Get latest @azure/mcp version
@@ -41,21 +56,19 @@ jobs:
             echo "Tag v$VERSION does not exist, proceeding with build"
           fi
 
-      # Install pkg and MCP package
-      - name: Install pkg and MCP
+      # Install platform-specific MCP package
+      - name: Install platform-specific MCP package
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          npm install -g pkg
           VERSION="${{ steps.get-version.outputs.version }}"
-          npm install @azure/mcp@$VERSION
+          npm install @azure/mcp-${{ matrix.npm-platform }}@$VERSION
 
-      # Build MCP binary for the platform
-      - name: Build MCP binary
+      # Extract binary from the platform package
+      - name: Extract MCP binary
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          npx pkg node_modules/@azure/mcp \
-            -t node20-${{ matrix.platform }} \
-            -o azure-mcp-${{ matrix.platform }}
+          cp node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }} azure-mcp-${{ matrix.platform }}
+          chmod +x azure-mcp-${{ matrix.platform }}
 
       # Create zip archive of the binary
       - name: Archive build
