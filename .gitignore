@@ -12,3 +12,6 @@ azure-mcp-*
 # SEA build artifacts
 sea-prep.blob
 *.exe.bak
+
+# Tools
+actionlint
