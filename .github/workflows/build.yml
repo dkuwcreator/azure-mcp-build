@@ -99,7 +99,7 @@ jobs:
         with:
           name: ${{ matrix.platform.archive }}
           path: ${{ matrix.platform.archive }}
-          retention-days: 1
+          retention-days: 7
   
   # Job 3: Create GitHub release with all binaries
   release:
@@ -121,12 +121,21 @@ jobs:
       # Step 2: Organize artifacts (flatten directory structure)
       - name: Organize artifacts
         run: |
+          set -e
           cd dist
           # Move all zip files to the current directory
           find . -name "*.zip" -exec mv {} . \;
           # Remove empty directories
           find . -type d -empty -delete
+          # Verify all expected files are present
+          for file in azure-mcp-win-x64.zip azure-mcp-linux-x64.zip azure-mcp-macos-x64.zip; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Expected file $file not found!"
+              exit 1
+            fi
+          done
           # List final artifacts
+          echo "Successfully organized artifacts:"
           ls -lh *.zip
       
       # Step 3: Create GitHub release with binaries
