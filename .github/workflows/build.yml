@@ -1,172 +1,76 @@
-name: Build and Release Azure MCP Server
+name: Build Azure MCP Server Binary
 
-# Trigger this workflow weekly on Sunday at 00:00 UTC
 on:
-  schedule:
-    - cron: '0 0 * * 0'
-  # Allow manual trigger for testing
   workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 5 * * 1"  # every Monday at 05:00 UTC
 
 jobs:
-  # Job 1: Check version and if release already exists
-  check-version:
+  build:
     runs-on: ubuntu-latest
-    
-    # Explicit permissions for security best practices
-    permissions:
-      contents: read
-    
-    outputs:
-      version: ${{ steps.get-version.outputs.version }}
-      should-build: ${{ steps.check-tag.outputs.should-build }}
-    
+    strategy:
+      matrix:
+        platform: [win-x64, linux-x64, macos-x64]
+
     steps:
-      # Step 1: Setup Node.js environment
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      # Step 2: Get the latest version of @azure/mcp from npm
+      # Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Get the latest version of @azure/mcp from npm
       - name: Get latest @azure/mcp version
         id: get-version
         run: |
           VERSION=$(npm view @azure/mcp version)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Latest @azure/mcp version: $VERSION"
-      
-      # Step 3: Check if release tag already exists
+
+      # Check if release tag already exists, skip build if it does
       - name: Check if release tag exists
         id: check-tag
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
           if git ls-remote --tags https://github.com/${{ github.repository }} | grep -q "refs/tags/v$VERSION$"; then
-            echo "should-build=false" >> $GITHUB_OUTPUT
-            echo "Tag v$VERSION already exists, skipping release"
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v$VERSION already exists, skipping build"
           else
-            echo "should-build=true" >> $GITHUB_OUTPUT
-            echo "Tag v$VERSION does not exist, proceeding with release"
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag v$VERSION does not exist, proceeding with build"
           fi
-  
-  # Job 2: Build binaries for each platform using a matrix
-  build:
-    runs-on: ubuntu-latest
-    needs: check-version
-    if: needs.check-version.outputs.should-build == 'true'
-    
-    # Explicit permissions for security best practices
-    permissions:
-      contents: read
-    
-    strategy:
-      matrix:
-        platform:
-          - name: win-x64
-            target: node20-win-x64
-            binary: azure-mcp-win-x64.exe
-            archive: azure-mcp-win-x64.zip
-          - name: linux-x64
-            target: node20-linux-x64
-            binary: azure-mcp-linux-x64
-            archive: azure-mcp-linux-x64.zip
-          - name: macos-x64
-            target: node20-macos-x64
-            binary: azure-mcp-macos-x64
-            archive: azure-mcp-macos-x64.zip
-    
-    steps:
-      # Step 1: Setup Node.js environment
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      # Step 2: Install pkg for creating standalone binaries
-      - name: Install pkg
-        run: npm install -g pkg
-      
-      # Step 3: Install @azure/mcp package
-      - name: Install @azure/mcp
+
+      # Install pkg and MCP package
+      - name: Install pkg and MCP
+        if: steps.check-tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ needs.check-version.outputs.version }}"
+          npm install -g pkg
+          VERSION="${{ steps.get-version.outputs.version }}"
           npm install @azure/mcp@$VERSION
-      
-      # Step 4: Build binary for the platform
-      - name: Build ${{ matrix.platform.name }} binary
+
+      # Build MCP binary for the platform
+      - name: Build MCP binary
+        if: steps.check-tag.outputs.exists == 'false'
         run: |
-          pkg node_modules/@azure/mcp/package.json --target ${{ matrix.platform.target }} --output ${{ matrix.platform.binary }}
-      
-      # Step 5: Create zip archive for the binary
-      - name: Create zip archive
+          npx pkg node_modules/@azure/mcp \
+            -t node20-${{ matrix.platform }} \
+            -o azure-mcp-${{ matrix.platform }}
+
+      # Create zip archive of the binary
+      - name: Archive build
+        if: steps.check-tag.outputs.exists == 'false'
         run: |
-          zip ${{ matrix.platform.archive }} ${{ matrix.platform.binary }}
-          ls -lh ${{ matrix.platform.archive }}
-      
-      # Step 6: Upload artifact for the release job
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.platform.archive }}
-          path: ${{ matrix.platform.archive }}
-          retention-days: 7
-  
-  # Job 3: Create GitHub release with all binaries
-  release:
-    runs-on: ubuntu-latest
-    needs: [check-version, build]
-    if: needs.check-version.outputs.should-build == 'true'
-    
-    # Required permissions for creating releases and tags
-    permissions:
-      contents: write
-    
-    steps:
-      # Step 1: Download all artifacts
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-      
-      # Step 2: Organize artifacts (flatten directory structure)
-      - name: Organize artifacts
-        run: |
-          set -e
-          cd dist
-          # Move all zip files to the current directory
-          find . -name "*.zip" -exec mv {} . \;
-          # Remove empty directories
-          find . -type d -empty -delete
-          # Verify all expected files are present
-          for file in azure-mcp-win-x64.zip azure-mcp-linux-x64.zip azure-mcp-macos-x64.zip; do
-            if [ ! -f "$file" ]; then
-              echo "ERROR: Expected file $file not found!"
-              exit 1
-            fi
-          done
-          # List final artifacts
-          echo "Successfully organized artifacts:"
-          ls -lh *.zip
-      
-      # Step 3: Create GitHub release with binaries
-      - name: Create GitHub Release
+          zip azure-mcp-${{ matrix.platform }}.zip azure-mcp-${{ matrix.platform }}
+
+      # Upload to GitHub release with version tag
+      - name: Upload release asset
+        if: steps.check-tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.check-version.outputs.version }}
-          name: Azure MCP Server v${{ needs.check-version.outputs.version }}
-          body: |
-            Automated release of Azure MCP Server binaries
-            
-            **Version:** ${{ needs.check-version.outputs.version }}
-            
-            **Available binaries:**
-            - Windows x64: `azure-mcp-win-x64.zip`
-            - Linux x64: `azure-mcp-linux-x64.zip`
-            - macOS x64: `azure-mcp-macos-x64.zip`
-            
-            These binaries were built from the [@azure/mcp](https://www.npmjs.com/package/@azure/mcp) npm package.
+          tag_name: v${{ steps.get-version.outputs.version }}
+          name: Azure MCP Server v${{ steps.get-version.outputs.version }}
           files: |
-            dist/azure-mcp-win-x64.zip
-            dist/azure-mcp-linux-x64.zip
-            dist/azure-mcp-macos-x64.zip
-          draft: false
-          prerelease: false
+            azure-mcp-${{ matrix.platform }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
