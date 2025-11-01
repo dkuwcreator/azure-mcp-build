@@ -1,0 +1,127 @@
+name: Build and Release Azure MCP Server
+
+# Trigger this workflow weekly on Sunday at 00:00 UTC
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    # Required permissions for creating releases and tags
+    permissions:
+      contents: write
+    
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Step 2: Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      # Step 3: Get the latest version of @azure/mcp from npm
+      - name: Get latest @azure/mcp version
+        id: get-version
+        run: |
+          VERSION=$(npm view @azure/mcp version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Latest @azure/mcp version: $VERSION"
+      
+      # Step 4: Check if release tag already exists
+      - name: Check if release tag exists
+        id: check-tag
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/v$VERSION$"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v$VERSION already exists, skipping release"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag v$VERSION does not exist, proceeding with release"
+          fi
+      
+      # Step 5: Install pkg for creating standalone binaries
+      - name: Install pkg
+        if: steps.check-tag.outputs.exists == 'false'
+        run: npm install -g pkg
+      
+      # Step 6: Install @azure/mcp package
+      - name: Install @azure/mcp
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          npm install @azure/mcp@$VERSION
+      
+      # Step 7: Create output directory for binaries
+      - name: Create output directory
+        if: steps.check-tag.outputs.exists == 'false'
+        run: mkdir -p dist
+      
+      # Step 8: Build binaries for Windows x64
+      - name: Build Windows x64 binary
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          pkg node_modules/@azure/mcp/package.json --target node20-win-x64 --output dist/azure-mcp-win-x64.exe
+      
+      # Step 9: Build binaries for Linux x64
+      - name: Build Linux x64 binary
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          pkg node_modules/@azure/mcp/package.json --target node20-linux-x64 --output dist/azure-mcp-linux-x64
+      
+      # Step 10: Build binaries for macOS x64
+      - name: Build macOS x64 binary
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          pkg node_modules/@azure/mcp/package.json --target node20-macos-x64 --output dist/azure-mcp-macos-x64
+      
+      # Step 11: Create zip archives for each binary
+      - name: Create zip archives
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          set -e
+          cd dist
+          # Verify binaries exist before zipping
+          [ -f azure-mcp-win-x64.exe ] || { echo "Windows binary not found"; exit 1; }
+          [ -f azure-mcp-linux-x64 ] || { echo "Linux binary not found"; exit 1; }
+          [ -f azure-mcp-macos-x64 ] || { echo "macOS binary not found"; exit 1; }
+          # Zip Windows binary
+          zip azure-mcp-win-x64.zip azure-mcp-win-x64.exe
+          # Zip Linux binary
+          zip azure-mcp-linux-x64.zip azure-mcp-linux-x64
+          # Zip macOS binary
+          zip azure-mcp-macos-x64.zip azure-mcp-macos-x64
+          # List created archives
+          ls -lh *.zip
+      
+      # Step 12: Create GitHub release with binaries
+      - name: Create GitHub Release
+        if: steps.check-tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get-version.outputs.version }}
+          name: Azure MCP Server v${{ steps.get-version.outputs.version }}
+          body: |
+            Automated release of Azure MCP Server binaries
+            
+            **Version:** ${{ steps.get-version.outputs.version }}
+            
+            **Available binaries:**
+            - Windows x64: `azure-mcp-win-x64.zip`
+            - Linux x64: `azure-mcp-linux-x64.zip`
+            - macOS x64: `azure-mcp-macos-x64.zip`
+            
+            These binaries were built from the [@azure/mcp](https://www.npmjs.com/package/@azure/mcp) npm package.
+          files: |
+            dist/azure-mcp-win-x64.zip
+            dist/azure-mcp-linux-x64.zip
+            dist/azure-mcp-macos-x64.zip
+          draft: false
+          prerelease: false
