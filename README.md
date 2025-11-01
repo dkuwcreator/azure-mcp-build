@@ -1,35 +1,31 @@
-# azure-mcp-build
+# Azure MCP Server - Ready-to-Use Binaries 🚀
 
-Automated build pipeline for distributing Azure MCP Server binaries.
+Get the Azure MCP Server up and running in seconds! **No npm, no Node.js, no hassle.**
 
-## Overview
+This repository automatically builds and publishes ready-to-use Azure MCP Server binaries for Windows, Linux, and macOS. Just download, unzip, and run!
 
-This repository contains a GitHub Actions workflow that automatically:
-1. Fetches the latest version of `@azure/mcp` from npm
+## 📥 Download
+
+Head to the [**Releases page**](https://github.com/dkuwcreator/azure-mcp-build/releases/latest) and download the binary for your platform:
+
+- **Windows** → `azure-mcp-win-x64.zip`
+- **Linux** → `azure-mcp-linux-x64.zip`
+- **macOS** → `azure-mcp-macos-x64.zip`
+
+Unzip the file and you're ready to go!
+
+## ✨ Why Use This?
+
+- ✅ **Zero dependencies** - No Node.js or npm installation required
+- ✅ **Always up-to-date** - Automatically built from the latest `@azure/mcp` releases
+- ✅ **Cross-platform** - Native binaries for Windows, Linux, and macOS
+- ✅ **Simple** - Just download, unzip, and run
+
+## 🔄 How It Works
+
+GitHub Actions automatically:
+1. Monitors for new `@azure/mcp` releases on npm
 2. Extracts platform-specific standalone executables
-3. Creates releases with binaries for Windows, Linux, and macOS
+3. Publishes them as GitHub releases (weekly checks + manual triggers)
 
-## Platform Support
-
-- **Windows x64** (`win-x64`): Extracted from `@azure/mcp-win32-x64`
-- **Linux x64** (`linux-x64`): Extracted from `@azure/mcp-linux-x64`
-- **macOS x64** (`macos-x64`): Extracted from `@azure/mcp-darwin-x64`
-
-## Build Process
-
-The workflow uses **Node.js 24.x LTS** and extracts pre-built standalone executables from the official `@azure/mcp` platform-specific packages. These binaries are single-executable applications that don't require Node.js to be installed on the target system.
-
-### Previous Approach
-Previously used `pkg` with Node 20 to package the wrapper script.
-
-### Current Approach
-- Uses Node.js 24.x LTS (latest Long Term Support version)
-- Extracts native standalone executables from platform-specific npm packages
-- Binaries are already optimized single-executable applications
-
-## Releases
-
-Releases are automatically created when a new version of `@azure/mcp` is published to npm. Each release includes:
-- `azure-mcp-win-x64.zip` - Windows x64 binary
-- `azure-mcp-linux-x64.zip` - Linux x64 binary
-- `azure-mcp-macos-x64.zip` - macOS x64 binary
+Perfect for anyone who wants to use the Azure MCP Server without setting up a development environment!
