@@ -98,4 +98,17 @@ GitHub Actions automatically:
 2. Extracts platform-specific standalone executables
 3. Publishes them as GitHub releases (weekly checks + manual triggers)
 
+### Force Rebuild
+
+If you need to rebuild packages for an existing release version:
+1. Go to the [Actions tab](https://github.com/dkuwcreator/azure-mcp-build/actions/workflows/build.yml)
+2. Click "Run workflow"
+3. Check the "Force rebuild even if release tag already exists" option
+4. Click "Run workflow" to start the build
+
+This is useful for:
+- Re-building after a failed or incomplete release
+- Testing workflow changes
+- Updating binaries with the same version
+
 Perfect for anyone who wants to use the Azure MCP Server without setting up a development environment!
