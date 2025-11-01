@@ -14,6 +14,27 @@ Head to the [**Releases page**](https://github.com/dkuwcreator/azure-mcp-build/r
 
 Unzip the file and you're ready to go!
 
+## 🚀 Quick Start
+
+After downloading and unzipping:
+
+**Windows:**
+```powershell
+.\azure-mcp-win-x64.exe --help
+```
+
+**Linux:**
+```bash
+chmod +x azure-mcp-linux-x64
+./azure-mcp-linux-x64 --help
+```
+
+**macOS:**
+```bash
+chmod +x azure-mcp-macos-x64
+./azure-mcp-macos-x64 --help
+```
+
 ## ✨ Why Use This?
 
 - ✅ **Zero dependencies** - No Node.js or npm installation required
