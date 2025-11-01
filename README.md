@@ -16,34 +16,25 @@ Unzip the file and you're ready to go!
 
 ## 🚀 Quick Start
 
-### 1. Authenticate with Azure
+After downloading and unzipping:
 
-Before using the MCP server, sign in to Azure using the Azure CLI:
-
-```bash
-# Install Azure CLI if you haven't already
-# Visit: https://learn.microsoft.com/cli/azure/install-azure-cli
-
-# Sign in to Azure
-az login
-```
-
-### 2. Run the Server
-
-**Windows (PowerShell):**
+**Windows:**
 ```powershell
-.\azure-mcp-win-x64.exe
+.\azure-mcp-win-x64.exe --help
 ```
 
 **Linux:**
 ```bash
 chmod +x azure-mcp-linux-x64
-./azure-mcp-linux-x64
+./azure-mcp-linux-x64 --help
 ```
 
 **macOS:**
 ```bash
 chmod +x azure-mcp-macos-x64
+./azure-mcp-macos-x64 --help
+```
+
 ./azure-mcp-macos-x64
 ```
 
