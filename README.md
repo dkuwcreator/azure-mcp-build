@@ -63,11 +63,25 @@ Configure your MCP client (like Claude Desktop) to connect to the server:
 }
 ```
 
-Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary (use `azure-mcp-win-x64.exe` for Windows, `azure-mcp-macos-x64` for macOS).
+Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary:
+- **Windows:** `C:\\path\\to\\azure-mcp-win-x64.exe`
+- **Linux:** `/home/username/azure-mcp-linux-x64`
+- **macOS:** `/Users/username/azure-mcp-macos-x64`
 
 **For VS Code with GitHub Copilot:**
 1. Install the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
-2. The extension will automatically detect and use the Azure MCP Server when configured
+2. Create `.vscode/mcp.json` in your workspace:
+   ```json
+   {
+     "servers": {
+       "azure": {
+         "type": "stdio",
+         "command": "/absolute/path/to/azure-mcp-linux-x64"
+       }
+     }
+   }
+   ```
+3. Open Command Palette (`Ctrl/Cmd + Shift + P`) and run **"MCP: List Servers"** to start the server
 
 ### 4. Start Using Azure Resources
 
