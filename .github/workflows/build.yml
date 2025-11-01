@@ -40,7 +40,7 @@ jobs:
         id: get-version
         run: |
           VERSION=$(npm view @azure/mcp version)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Latest @azure/mcp version: $VERSION"
 
       # Check if release tag already exists, skip build if it does
@@ -48,11 +48,11 @@ jobs:
         id: check-tag
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          if git ls-remote --tags https://github.com/${{ github.repository }} | grep -q "refs/tags/v$VERSION$"; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+          if git ls-remote --tags "https://github.com/${{ github.repository }}" | grep -q "refs/tags/v$VERSION\$"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag v$VERSION already exists, skipping build"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "Tag v$VERSION does not exist, proceeding with build"
           fi
 
@@ -61,7 +61,7 @@ jobs:
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          npm install @azure/mcp-${{ matrix.npm-platform }}@$VERSION
+          npm install "@azure/mcp-${{ matrix.npm-platform }}@$VERSION"
 
       # Extract binary from the platform package
       - name: Extract MCP binary
