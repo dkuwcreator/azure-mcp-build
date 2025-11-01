@@ -11,6 +11,11 @@ jobs:
   # Job 1: Check version and if release already exists
   check-version:
     runs-on: ubuntu-latest
+    
+    # Explicit permissions for security best practices
+    permissions:
+      contents: read
+    
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       should-build: ${{ steps.check-tag.outputs.should-build }}
@@ -48,6 +53,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-version
     if: needs.check-version.outputs.should-build == 'true'
+    
+    # Explicit permissions for security best practices
+    permissions:
+      contents: read
     
     strategy:
       matrix:
