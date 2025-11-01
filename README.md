@@ -14,6 +14,85 @@ Head to the [**Releases page**](https://github.com/dkuwcreator/azure-mcp-build/r
 
 Unzip the file and you're ready to go!
 
+## 🚀 Quick Start
+
+### 1. Authenticate with Azure
+
+Before using the MCP server, sign in to Azure using the Azure CLI:
+
+```bash
+# Install Azure CLI if you haven't already
+# Visit: https://learn.microsoft.com/cli/azure/install-azure-cli
+
+# Sign in to Azure
+az login
+```
+
+### 2. Run the Server
+
+**Windows (PowerShell):**
+```powershell
+.\azure-mcp-win-x64.exe
+```
+
+**Linux:**
+```bash
+chmod +x azure-mcp-linux-x64
+./azure-mcp-linux-x64
+```
+
+**macOS:**
+```bash
+chmod +x azure-mcp-macos-x64
+./azure-mcp-macos-x64
+```
+
+### 3. Connect from Your MCP Client
+
+Configure your MCP client (like Claude Desktop) to connect to the server:
+
+**Example configuration for Claude Desktop (`claude_desktop_config.json`):**
+
+```json
+{
+  "mcpServers": {
+    "azure": {
+      "command": "/absolute/path/to/azure-mcp-linux-x64",
+      "args": []
+    }
+  }
+}
+```
+
+Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary:
+- **Windows:** `C:\\path\\to\\azure-mcp-win-x64.exe`
+- **Linux:** `/home/username/azure-mcp-linux-x64`
+- **macOS:** `/Users/username/azure-mcp-macos-x64`
+
+**For VS Code with GitHub Copilot:**
+1. Install the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
+2. Create `.vscode/mcp.json` in your workspace:
+   ```json
+   {
+     "servers": {
+       "azure": {
+         "type": "stdio",
+         "command": "/absolute/path/to/azure-mcp-linux-x64",
+         "args": []
+       }
+     }
+   }
+   ```
+3. Open Command Palette (`Ctrl/Cmd + Shift + P`) and run **"MCP: Restart Servers"** to load the configuration
+
+### 4. Start Using Azure Resources
+
+Once connected, you can interact with your Azure resources through natural language:
+- "List all my storage accounts"
+- "Show resource groups"
+- "Query my Cosmos DB"
+- "Run Azure CLI commands"
+
 ## ✨ Why Use This?
 
 - ✅ **Zero dependencies** - No Node.js or npm installation required
