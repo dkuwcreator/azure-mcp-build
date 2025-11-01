@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.zip
+azure-mcp-*
+
+# Temporary files
+*.tmp
+.DS_Store
+
+# SEA build artifacts
+sea-prep.blob
+*.exe.bak
+
+# Tools
+actionlint
