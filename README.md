@@ -83,7 +83,7 @@ Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to y
      }
    }
    ```
-3. Open Command Palette (`Ctrl/Cmd + Shift + P`) and run **"MCP: List Servers"** to start the server
+3. Open Command Palette (`Ctrl/Cmd + Shift + P`) and run **"MCP: Restart Servers"** to load the configuration
 
 ### 4. Start Using Azure Resources
 
