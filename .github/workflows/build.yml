@@ -57,7 +57,7 @@ jobs:
         id: check-tag
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          FORCE_REBUILD="${{ github.event.inputs.force-rebuild }}"
+          FORCE_REBUILD="${{ github.event.inputs.force-rebuild || 'false' }}"
           
           if [ "$FORCE_REBUILD" = "true" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
