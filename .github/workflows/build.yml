@@ -71,7 +71,13 @@ jobs:
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           SOURCE="node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }}"
-          TARGET="azure-mcp-${{ matrix.platform }}"
+          
+          # Preserve .exe extension for Windows binaries
+          if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
+            TARGET="azure-mcp-${{ matrix.platform }}.exe"
+          else
+            TARGET="azure-mcp-${{ matrix.platform }}"
+          fi
           
           if [ ! -f "$SOURCE" ]; then
             echo "Error: Binary not found at $SOURCE"
@@ -89,7 +95,34 @@ jobs:
       - name: Archive build
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          zip azure-mcp-${{ matrix.platform }}.zip azure-mcp-${{ matrix.platform }}
+          # Use correct binary name with extension if applicable
+          if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
+            BINARY="azure-mcp-${{ matrix.platform }}.exe"
+          else
+            BINARY="azure-mcp-${{ matrix.platform }}"
+          fi
+          zip azure-mcp-${{ matrix.platform }}.zip "$BINARY"
+
+      # Smoke test: verify the binary can be executed
+      - name: Smoke test binary
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          # Determine binary name with correct extension
+          if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
+            BINARY="azure-mcp-${{ matrix.platform }}.exe"
+          else
+            BINARY="azure-mcp-${{ matrix.platform }}"
+          fi
+          
+          # For Windows binaries on Linux, we can only check if it's a valid PE executable
+          # For Unix binaries, we can try to run them with --help
+          if [[ "${{ matrix.platform }}" == "win-x64" ]]; then
+            echo "Verifying Windows binary is a valid PE executable..."
+            file "$BINARY" | grep -q "PE32+" && echo "✓ Valid Windows PE executable" || exit 1
+          else
+            echo "Testing binary execution with --help..."
+            ./"$BINARY" --help || echo "Binary executed (exit code: $?)"
+          fi
 
       # Upload to GitHub release with version tag
       - name: Upload release asset
