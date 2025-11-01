@@ -16,11 +16,7 @@ Unzip the file and you're ready to go!
 
 ## 🚀 Quick Start
 
-### 1. Download and Extract
-
-Download the binary for your platform from the [Releases page](https://github.com/dkuwcreator/azure-mcp-build/releases/latest) and unzip it.
-
-### 2. Authenticate with Azure
+### 1. Authenticate with Azure
 
 Before using the MCP server, sign in to Azure using the Azure CLI:
 
@@ -32,20 +28,26 @@ Before using the MCP server, sign in to Azure using the Azure CLI:
 az login
 ```
 
-### 3. Run the Server
+### 2. Run the Server
 
 **Windows (PowerShell):**
 ```powershell
 .\azure-mcp-win-x64.exe
 ```
 
-**Linux/macOS:**
+**Linux:**
 ```bash
-chmod +x azure-mcp-linux-x64  # or azure-mcp-macos-x64
-./azure-mcp-linux-x64  # or ./azure-mcp-macos-x64
+chmod +x azure-mcp-linux-x64
+./azure-mcp-linux-x64
 ```
 
-### 4. Connect from Your MCP Client
+**macOS:**
+```bash
+chmod +x azure-mcp-macos-x64
+./azure-mcp-macos-x64
+```
+
+### 3. Connect from Your MCP Client
 
 Configure your MCP client (like Claude Desktop) to connect to the server:
 
@@ -55,18 +57,18 @@ Configure your MCP client (like Claude Desktop) to connect to the server:
 {
   "mcpServers": {
     "azure": {
-      "command": "/path/to/azure-mcp-linux-x64"
+      "command": "/absolute/path/to/azure-mcp-linux-x64"
     }
   }
 }
 ```
 
-Replace `/path/to/azure-mcp-linux-x64` with the full path to your downloaded binary.
+Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary (use `azure-mcp-win-x64.exe` for Windows, `azure-mcp-macos-x64` for macOS).
 
 **For VS Code with GitHub Copilot:**
 Install the Azure MCP Server extension and it will automatically use the binary.
 
-### 5. Start Using Azure Resources
+### 4. Start Using Azure Resources
 
 Once connected, you can interact with your Azure resources through natural language:
 - "List all my storage accounts"
