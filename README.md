@@ -111,4 +111,15 @@ This is useful for:
 - Testing workflow changes
 - Updating binaries with the same version
 
+### Build a Specific Version
+
+You can build any version of the Azure MCP Server that exists on npm:
+1. Go to the [Actions tab](https://github.com/dkuwcreator/azure-mcp-build/actions/workflows/build.yml)
+2. Click "Run workflow"
+3. In the "Version" field, enter the version you want to build (e.g., `1.0.0`, `0.9.5`)
+4. Leave the field empty or enter `latest` to build the most recent version
+5. Click "Run workflow" to start the build
+
+You can find available versions on the [@azure/mcp npm page](https://www.npmjs.com/package/@azure/mcp?activeTab=versions).
+
 Perfect for anyone who wants to use the Azure MCP Server without setting up a development environment!
