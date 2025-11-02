@@ -2,6 +2,12 @@ name: Build Azure MCP Server Binary
 
 on:
   workflow_dispatch:
+    inputs:
+      force-rebuild:
+        description: 'Force rebuild even if release tag already exists'
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -46,12 +52,19 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Latest @azure/mcp version: $VERSION"
 
-      # Check if release tag already exists, skip build if it does
+      # Check if release tag already exists, skip build if it does (unless force-rebuild is true)
       - name: Check if release tag exists
         id: check-tag
         run: |
           VERSION="${{ steps.get-version.outputs.version }}"
-          if git ls-remote --tags "https://github.com/${{ github.repository }}" | grep -q "refs/tags/v$VERSION\$"; then
+          # GitHub Actions converts boolean inputs to string 'true' or 'false'
+          # Default to 'false' when triggered by push/schedule (non-manual triggers)
+          FORCE_REBUILD="${{ github.event.inputs.force-rebuild || 'false' }}"
+          
+          if [ "$FORCE_REBUILD" = "true" ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Force rebuild enabled, proceeding with build for v$VERSION"
+          elif git ls-remote --tags "https://github.com/${{ github.repository }}" | grep -q "refs/tags/v$VERSION\$"; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag v$VERSION already exists, skipping build"
           else
