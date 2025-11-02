@@ -61,11 +61,14 @@ jobs:
             echo "Building latest @azure/mcp version: $VERSION"
           else
             # Verify the specified version exists on npm
-            if npm view "@azure/mcp@$REQUESTED_VERSION" version > /dev/null 2>&1; then
+            echo "Checking if @azure/mcp@$REQUESTED_VERSION exists on npm..."
+            if VERSION_CHECK=$(npm view "@azure/mcp@$REQUESTED_VERSION" version 2>&1); then
               VERSION="$REQUESTED_VERSION"
               echo "Building specified @azure/mcp version: $VERSION"
             else
               echo "Error: Version $REQUESTED_VERSION not found on npm"
+              echo "Please check available versions at: https://www.npmjs.com/package/@azure/mcp?activeTab=versions"
+              echo "npm output: $VERSION_CHECK"
               exit 1
             fi
           fi
