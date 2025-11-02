@@ -143,14 +143,22 @@ jobs:
         run: |
           BINARY="${{ steps.extract-binary.outputs.binary-name }}"
           
-          # For Windows binaries on Linux, we can only check if it's a valid PE executable
-          # For Unix binaries, we can try to run them with --help
+          # We're running on Linux, so we can only execute Linux binaries
+          # For Windows and macOS binaries, verify they are valid executables
           if [[ "${{ matrix.platform }}" == "win-x64" ]]; then
             echo "Verifying Windows binary is a valid PE executable..."
             if file "$BINARY" | grep -q "PE32+"; then
               echo "✓ Valid Windows PE executable"
             else
               echo "✗ Failed: Not a valid Windows PE executable"
+              exit 1
+            fi
+          elif [[ "${{ matrix.platform }}" == "macos-x64" ]]; then
+            echo "Verifying macOS binary is a valid Mach-O executable..."
+            if file "$BINARY" | grep -q "Mach-O"; then
+              echo "✓ Valid macOS Mach-O executable"
+            else
+              echo "✗ Failed: Not a valid macOS Mach-O executable"
               exit 1
             fi
           else
