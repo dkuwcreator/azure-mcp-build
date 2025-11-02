@@ -3,6 +3,11 @@ name: Build Azure MCP Server Binary
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version of @azure/mcp to build (e.g., "1.0.0" or "latest" for the most recent version)'
+        required: false
+        type: string
+        default: 'latest'
       force-rebuild:
         description: 'Force rebuild even if release tag already exists'
         required: false
@@ -44,13 +49,28 @@ jobs:
         with:
           node-version: '24.x'
 
-      # Get the latest version of @azure/mcp from npm
-      - name: Get latest @azure/mcp version
+      # Get the version of @azure/mcp to build
+      - name: Get @azure/mcp version
         id: get-version
         run: |
-          VERSION=$(npm view @azure/mcp version)
+          # Use specified version or default to 'latest'
+          REQUESTED_VERSION="${{ github.event.inputs.version || 'latest' }}"
+          
+          if [ "$REQUESTED_VERSION" = "latest" ]; then
+            VERSION=$(npm view @azure/mcp version)
+            echo "Building latest @azure/mcp version: $VERSION"
+          else
+            # Verify the specified version exists on npm
+            if npm view "@azure/mcp@$REQUESTED_VERSION" version > /dev/null 2>&1; then
+              VERSION="$REQUESTED_VERSION"
+              echo "Building specified @azure/mcp version: $VERSION"
+            else
+              echo "Error: Version $REQUESTED_VERSION not found on npm"
+              exit 1
+            fi
+          fi
+          
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Latest @azure/mcp version: $VERSION"
 
       # Check if release tag already exists, skip build if it does (unless force-rebuild is true)
       - name: Check if release tag exists
