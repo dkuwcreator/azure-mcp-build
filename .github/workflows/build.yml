@@ -108,12 +108,13 @@ jobs:
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           SOURCE="node_modules/@azure/mcp-${{ matrix.npm-platform }}/dist/${{ matrix.binary-name }}"
+          VERSION="${{ steps.get-version.outputs.version }}"
           
           # Preserve .exe extension for Windows binaries
           if [[ "${{ matrix.binary-name }}" =~ \.exe$ ]]; then
-            TARGET="azure-mcp-${{ matrix.platform }}.exe"
+            TARGET="azure-mcp-${{ matrix.platform }}-v${VERSION}.exe"
           else
-            TARGET="azure-mcp-${{ matrix.platform }}"
+            TARGET="azure-mcp-${{ matrix.platform }}-v${VERSION}"
           fi
           
           if [ ! -f "$SOURCE" ]; then
@@ -135,7 +136,8 @@ jobs:
       - name: Archive build
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          zip azure-mcp-${{ matrix.platform }}.zip "${{ steps.extract-binary.outputs.binary-name }}"
+          VERSION="${{ steps.get-version.outputs.version }}"
+          zip "azure-mcp-${{ matrix.platform }}-v${VERSION}.zip" "${{ steps.extract-binary.outputs.binary-name }}"
 
       # Smoke test: verify the binary can be executed
       - name: Smoke test binary
@@ -191,6 +193,6 @@ jobs:
           tag_name: v${{ steps.get-version.outputs.version }}
           name: Azure MCP Server v${{ steps.get-version.outputs.version }}
           files: |
-            azure-mcp-${{ matrix.platform }}.zip
+            azure-mcp-${{ matrix.platform }}-v${{ steps.get-version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

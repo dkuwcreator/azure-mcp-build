@@ -8,9 +8,9 @@ This repository automatically builds and publishes ready-to-use Azure MCP Server
 
 Head to the [**Releases page**](https://github.com/dkuwcreator/azure-mcp-build/releases/latest) and download the binary for your platform:
 
-- **Windows** → `azure-mcp-win-x64.zip`
-- **Linux** → `azure-mcp-linux-x64.zip`
-- **macOS** → `azure-mcp-macos-x64.zip`
+- **Windows** → `azure-mcp-win-x64-v{version}.zip` (e.g., `azure-mcp-win-x64-v1.0.0.zip`)
+- **Linux** → `azure-mcp-linux-x64-v{version}.zip` (e.g., `azure-mcp-linux-x64-v1.0.0.zip`)
+- **macOS** → `azure-mcp-macos-x64-v{version}.zip` (e.g., `azure-mcp-macos-x64-v1.0.0.zip`)
 
 Unzip the file and you're ready to go!
 
@@ -20,22 +20,19 @@ After downloading and unzipping:
 
 **Windows:**
 ```powershell
-.\azure-mcp-win-x64.exe --help
+.\azure-mcp-win-x64-v{version}.exe --help
 ```
 
 **Linux:**
 ```bash
-chmod +x azure-mcp-linux-x64
-./azure-mcp-linux-x64 --help
+chmod +x azure-mcp-linux-x64-v{version}
+./azure-mcp-linux-x64-v{version} --help
 ```
 
 **macOS:**
 ```bash
-chmod +x azure-mcp-macos-x64
-./azure-mcp-macos-x64 --help
-```
-
-./azure-mcp-macos-x64
+chmod +x azure-mcp-macos-x64-v{version}
+./azure-mcp-macos-x64-v{version} --help
 ```
 
 ### 3. Connect from Your MCP Client
@@ -48,17 +45,17 @@ Configure your MCP client (like Claude Desktop) to connect to the server:
 {
   "mcpServers": {
     "azure": {
-      "command": "/absolute/path/to/azure-mcp-linux-x64",
+      "command": "/absolute/path/to/azure-mcp-linux-x64-v{version}",
       "args": []
     }
   }
 }
 ```
 
-Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to your downloaded binary:
-- **Windows:** `C:\\path\\to\\azure-mcp-win-x64.exe`
-- **Linux:** `/home/username/azure-mcp-linux-x64`
-- **macOS:** `/Users/username/azure-mcp-macos-x64`
+Replace `/absolute/path/to/azure-mcp-linux-x64-v{version}` with the full absolute path to your downloaded binary:
+- **Windows:** `C:\\path\\to\\azure-mcp-win-x64-v{version}.exe`
+- **Linux:** `/home/username/azure-mcp-linux-x64-v{version}`
+- **macOS:** `/Users/username/azure-mcp-macos-x64-v{version}`
 
 **For VS Code with GitHub Copilot:**
 1. Install the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
@@ -68,7 +65,7 @@ Replace `/absolute/path/to/azure-mcp-linux-x64` with the full absolute path to y
      "servers": {
        "azure": {
          "type": "stdio",
-         "command": "/absolute/path/to/azure-mcp-linux-x64",
+         "command": "/absolute/path/to/azure-mcp-linux-x64-v{version}",
          "args": []
        }
      }
