@@ -35,9 +35,6 @@ chmod +x azure-mcp-macos-x64-v{version}
 ./azure-mcp-macos-x64-v{version} --help
 ```
 
-./azure-mcp-macos-x64
-```
-
 ### 3. Connect from Your MCP Client
 
 Configure your MCP client (like Claude Desktop) to connect to the server:
