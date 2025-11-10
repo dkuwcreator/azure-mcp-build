@@ -132,13 +132,6 @@ jobs:
           # Export binary name for subsequent steps
           echo "binary-name=$TARGET" >> "$GITHUB_OUTPUT"
 
-      # Create zip archive of the binary
-      - name: Archive build
-        if: steps.check-tag.outputs.exists == 'false'
-        run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
-          zip "azure-mcp-${{ matrix.platform }}-v${VERSION}.zip" "${{ steps.extract-binary.outputs.binary-name }}"
-
       # Smoke test: verify the binary can be executed
       - name: Smoke test binary
         if: steps.check-tag.outputs.exists == 'false'
@@ -193,6 +186,77 @@ jobs:
           tag_name: v${{ steps.get-version.outputs.version }}
           name: Azure MCP Server v${{ steps.get-version.outputs.version }}
           files: |
-            azure-mcp-${{ matrix.platform }}-v${{ steps.get-version.outputs.version }}.zip
+            ${{ steps.extract-binary.outputs.binary-name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.result == 'success' || needs.build.result == 'skipped'
+    
+    steps:
+      # Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Node.js with latest LTS version
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      # Get the version of @azure/mcp to build
+      - name: Get @azure/mcp version
+        id: get-version
+        run: |
+          # Use specified version or default to 'latest'
+          REQUESTED_VERSION="${{ github.event.inputs.version || 'latest' }}"
+          
+          if [ "$REQUESTED_VERSION" = "latest" ]; then
+            VERSION=$(npm view @azure/mcp version)
+            echo "Building latest @azure/mcp version: $VERSION"
+          else
+            # Verify the specified version exists on npm
+            echo "Checking if @azure/mcp@$REQUESTED_VERSION exists on npm..."
+            if VERSION_CHECK=$(npm view "@azure/mcp@$REQUESTED_VERSION" version 2>&1); then
+              VERSION="$REQUESTED_VERSION"
+              echo "Building specified @azure/mcp version: $VERSION"
+            else
+              echo "Error: Version $REQUESTED_VERSION not found on npm"
+              echo "Please check available versions at: https://www.npmjs.com/package/@azure/mcp?activeTab=versions"
+              echo "npm output: $VERSION_CHECK"
+              exit 1
+            fi
+          fi
+          
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # Set up QEMU for multi-platform builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            MCP_VERSION=${{ steps.get-version.outputs.version }}
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.get-version.outputs.version }}

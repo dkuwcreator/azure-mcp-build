@@ -4,6 +4,7 @@ node_modules/
 # Build artifacts
 *.zip
 azure-mcp-*
+!.dockerignore
 
 # Temporary files
 *.tmp

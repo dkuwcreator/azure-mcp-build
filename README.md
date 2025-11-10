@@ -2,21 +2,23 @@
 
 Get the Azure MCP Server up and running in seconds! **No npm, no Node.js, no hassle.**
 
-This repository automatically builds and publishes ready-to-use Azure MCP Server binaries for Windows, Linux, and macOS. Just download, unzip, and run!
+This repository automatically builds and publishes ready-to-use Azure MCP Server binaries for Windows, Linux, and macOS, plus Docker images. Just download and run, or use Docker!
 
 ## 📥 Download
 
 Head to the [**Releases page**](https://github.com/dkuwcreator/azure-mcp-build/releases/latest) and download the binary for your platform:
 
-- **Windows** → `azure-mcp-win-x64-v{version}.zip` (e.g., `azure-mcp-win-x64-v1.0.0.zip`)
-- **Linux** → `azure-mcp-linux-x64-v{version}.zip` (e.g., `azure-mcp-linux-x64-v1.0.0.zip`)
-- **macOS** → `azure-mcp-macos-x64-v{version}.zip` (e.g., `azure-mcp-macos-x64-v1.0.0.zip`)
+- **Windows** → `azure-mcp-win-x64-v{version}.exe` (e.g., `azure-mcp-win-x64-v1.0.0.exe`)
+- **Linux** → `azure-mcp-linux-x64-v{version}` (e.g., `azure-mcp-linux-x64-v1.0.0`)
+- **macOS** → `azure-mcp-macos-x64-v{version}` (e.g., `azure-mcp-macos-x64-v1.0.0`)
 
-Unzip the file and you're ready to go!
+Download the file and you're ready to go!
 
 ## 🚀 Quick Start
 
-After downloading and unzipping:
+### Option 1: Using Pre-built Binaries
+
+After downloading the binary:
 
 **Windows:**
 ```powershell
@@ -33,6 +35,22 @@ chmod +x azure-mcp-linux-x64-v{version}
 ```bash
 chmod +x azure-mcp-macos-x64-v{version}
 ./azure-mcp-macos-x64-v{version} --help
+```
+
+### Option 2: Using Docker
+
+Pull and run the Docker image:
+
+```bash
+docker pull ghcr.io/dkuwcreator/azure-mcp-build:latest
+docker run -it ghcr.io/dkuwcreator/azure-mcp-build:latest --help
+```
+
+Or use a specific version:
+
+```bash
+docker pull ghcr.io/dkuwcreator/azure-mcp-build:{version}
+docker run -it ghcr.io/dkuwcreator/azure-mcp-build:{version} --help
 ```
 
 ### 3. Connect from Your MCP Client
@@ -57,6 +75,19 @@ Replace `/absolute/path/to/azure-mcp-linux-x64-v{version}` with the full absolut
 - **Linux:** `/home/username/azure-mcp-linux-x64-v{version}`
 - **macOS:** `/Users/username/azure-mcp-macos-x64-v{version}`
 
+**Using Docker with Claude Desktop:**
+
+```json
+{
+  "mcpServers": {
+    "azure": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/dkuwcreator/azure-mcp-build:latest"]
+    }
+  }
+}
+```
+
 **For VS Code with GitHub Copilot:**
 1. Install the [GitHub Copilot Chat extension](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)
 2. Create `.vscode/mcp.json` in your workspace:
@@ -73,6 +104,21 @@ Replace `/absolute/path/to/azure-mcp-linux-x64-v{version}` with the full absolut
    ```
 3. Open Command Palette (`Ctrl/Cmd + Shift + P`) and run **"MCP: Restart Servers"** to load the configuration
 
+**Using Docker with VS Code:**
+
+Create `.vscode/mcp.json` in your workspace:
+```json
+{
+  "servers": {
+    "azure": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/dkuwcreator/azure-mcp-build:latest"]
+    }
+  }
+}
+```
+
 ### 4. Start Using Azure Resources
 
 Once connected, you can interact with your Azure resources through natural language:
@@ -85,15 +131,17 @@ Once connected, you can interact with your Azure resources through natural langu
 
 - ✅ **Zero dependencies** - No Node.js or npm installation required
 - ✅ **Always up-to-date** - Automatically built from the latest `@azure/mcp` releases
-- ✅ **Cross-platform** - Native binaries for Windows, Linux, and macOS
-- ✅ **Simple** - Just download, unzip, and run
+- ✅ **Cross-platform** - Native binaries for Windows, Linux, and macOS, plus Docker support
+- ✅ **Simple** - Just download and run, or use Docker
+- ✅ **Flexible** - Choose between standalone binaries or containerized deployment
 
 ## 🔄 How It Works
 
 GitHub Actions automatically:
 1. Monitors for new `@azure/mcp` releases on npm
-2. Extracts platform-specific standalone executables
-3. Publishes them as GitHub releases (weekly checks + manual triggers)
+2. Extracts platform-specific standalone executables and publishes them as GitHub releases
+3. Builds multi-platform Docker images and publishes them to GitHub Container Registry
+4. Runs weekly checks and supports manual triggers
 
 ### Force Rebuild
 
