@@ -1,0 +1,25 @@
+# Git files
+.git
+.gitignore
+
+# GitHub workflows
+.github
+
+# Dependencies
+node_modules
+
+# Build artifacts
+*.zip
+azure-mcp-*
+
+# Temporary files
+*.tmp
+.DS_Store
+sea-prep.blob
+*.exe.bak
+
+# Tools
+actionlint
+
+# Documentation (we only need the runtime, not docs in the image)
+README.md
