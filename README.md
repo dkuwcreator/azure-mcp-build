@@ -2,7 +2,7 @@
 
 Get the Azure MCP Server up and running in seconds! **No npm, no Node.js, no hassle.**
 
-This repository automatically builds and publishes ready-to-use Azure MCP Server binaries for Windows, Linux, and macOS. Just download, unzip, and run!
+This repository automatically builds and publishes ready-to-use Azure MCP Server binaries for Windows, Linux, and macOS, plus Docker images. Just download and run, or use Docker!
 
 ## 📥 Download
 
